@@ -6,6 +6,8 @@ upload: your images never leave the browser tab.
 
 ![status](https://img.shields.io/badge/100%25-local-brightgreen) ![license](https://img.shields.io/badge/license-MIT-blue)
 
+**Live:** <https://site-e9e71010b4a34c7aa822ae8a8a79b2c7.freebuff.page>
+
 ## Features
 
 - **4× super-resolution** with Real-ESRGAN, plus a 2× output option
@@ -31,6 +33,24 @@ npm run build     # type-check + production bundle in dist/
 npm run preview   # serve the production build locally
 npm run lint      # oxlint
 ```
+
+## Deploying
+
+`dist/` is a plain static site (under 1 MB) — GitHub Pages, Netlify, Cloudflare Pages or any static
+host works. [deploy/](deploy) holds the Sites manifest and an asset-only Worker used for the live
+deployment above:
+
+```bash
+npm run build
+# then upload deploy/manifest.json with your host's deployer
+```
+
+For hosting on a subpath (like `user.github.io/image-upscaler-ai/`), set
+`base: '/image-upscaler-ai/'` in `vite.config.ts`.
+
+The ~23 MB ONNX Runtime WASM binary is deliberately not shipped: it would exceed per-file limits
+on most static hosts, so `src/upscaler/upscaler.worker.ts` loads it from jsDelivr pinned to the
+exact `onnxruntime-web` version in `package.json`. Keep those two versions in sync when upgrading.
 
 ## How it works
 
@@ -82,12 +102,6 @@ To point at your own weights, change `MODEL_BASE_URL` in `src/upscaler/models.ts
   simple static hosting cannot provide. If you serve the app behind such headers, set
   `ort.env.wasm.numThreads` in the worker to `navigator.hardwareConcurrency`.
 - The app must be served over HTTPS or `localhost` (WebGPU and workers need a secure context).
-
-## Deploying
-
-The build output in `dist/` is a static site — GitHub Pages, Netlify, Cloudflare Pages or any static
-host works. For a site served from a subpath (like `user.github.io/image-upscaler-ai/`), set
-`base: '/image-upscaler-ai/'` in `vite.config.ts`.
 
 ## Credits
 
