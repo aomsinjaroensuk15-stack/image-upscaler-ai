@@ -22,10 +22,14 @@ const ctx = self as unknown as {
 };
 
 // Threads stay off because plain static hosting cannot send the cross-origin
-// isolation headers multi-threaded WASM needs. The .wasm asset itself is emitted
-// by the bundler next to this worker.
+// isolation headers multi-threaded WASM needs.
 ort.env.wasm.numThreads = 1;
 ort.env.logLevel = 'error';
+
+// The runtime's WASM binary is ~23 MB, larger than most static hosts accept for a
+// single file, so it is loaded from a CDN build pinned to the exact bundled version.
+// Every other module (ONNX Runtime JS, models) ships with the app or its model host.
+ort.env.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.23.0/dist/';
 
 let sessionCache: { modelId: string; session: ort.InferenceSession; provider: 'webgpu' | 'wasm' } | null =
   null;
